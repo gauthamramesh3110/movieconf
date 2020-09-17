@@ -1,0 +1,35 @@
+html {
+    height: 100%;
+}
+
+body {
+    background-color: #f0f0f0;
+    min-height: 100%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+}
+
+.logo {
+    margin-bottom: 60px;
+}
+
+.card {
+    width: 500px;
+}
+
+#nickname {
+    margin-top: 60px;
+}
+
+#nickname {
+    width: 200px;
+}
+
+#warning {
+    color: red;
+    font-size: 10px;
+    margin-top: 10px;
+    visibility: hidden;
+}

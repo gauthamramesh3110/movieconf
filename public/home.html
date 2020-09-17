@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Streamo</title>
+    <link rel="stylesheet" href="./styles/main.css">
+    <link rel="stylesheet" href="./styles/home.css">
+</head>
+
+<body>
+    <div id="video-pane">
+        <video controls></video>
+    </div>
+    <div id="chat-pane">
+        <div class="logo">streamo</div>
+        <div id="room-id">Room ID: </div>
+        <div class="btn small" id="select-file">select file</div>
+        <input type="file" id="fileElem" multiple accept="image/*" style="display:none">
+        <div id="filename">hi</div>
+        <div class="btn small" id="leave-room">leave room</div>
+        <div id="chatbox"></div>
+        <input type="text" class="text-input" id="chat-input" placeholder="type your message...">
+    </div>
+    <script src="/socket.io/socket.io.js"></script>
+    <script src="./scripts/main.js"></script>
+    <script src="./scripts/home.js"></script>
+</body>
+
+</html>

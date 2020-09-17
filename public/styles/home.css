@@ -1,0 +1,110 @@
+html {
+    height: 100vh;
+}
+
+body {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: row;
+}
+
+#video-pane {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    width: 75%;
+    height: 100vh;
+    background-color: black;
+}
+
+#chat-pane {
+    width: 25%;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 100vh;
+}
+
+.logo {
+    margin-top: 30px;
+    font-size: 3vw;
+}
+
+#room-id {
+    color: #19297c;
+    font-size: 1vw;
+    margin-bottom: 20px;
+}
+
+#filename {
+    margin-top: 2px;
+    margin-bottom: 15px;
+    font-size: 0.8vw;
+}
+
+#select-file {
+    font-size: 1.2vw;
+}
+
+#leave-room {
+    font-size: 1.2vw;
+    background-color: #d72638;
+}
+
+#chatbox {
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    align-items: center;
+    overflow-y: scroll;
+    height: auto;
+    margin-top: 30px;
+    width: 100%;
+    border-top: #19297c;
+    border-top-width: 2px;
+    border-top-style: solid;
+}
+
+#chat-input {
+    width: 90%;
+    margin: 20px 0px;
+}
+
+.notification-bubble {
+    background-color: #8693ab;
+    color: white;
+    width: fit-content;
+    padding: 3px 10px;
+    border-radius: 4px;
+    align-self: center;
+    margin: 10px 0px;
+}
+
+.message-bubble {
+    width: fit-content;
+    padding: 3px 10px;
+    border-radius: 4px;
+    margin: 10px 0px;
+}
+
+.message-bubble .message-sender {
+    font-weight: 900;
+}
+
+.message-bubble.received {
+    background-color: #19297c;
+    color: white;
+    align-self: flex-end;
+    margin-right: 10px;
+}
+
+.message-bubble.sent {
+    background-color: #637074;
+    color: white;
+    align-self: flex-start;
+    margin-left: 10px;
+}
+
+video {
+    width: 100%;
+}
