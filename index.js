@@ -38,6 +38,7 @@ io.on('connection', (socket) => {
         socket.on('disconnect', () => {
             if (admins[roomId] != undefined) {
                 socket.to(admins[roomId][0]).emit('user-disconnected', userId, nickname);
+                delete admins[roomId]
             }
         });
 
