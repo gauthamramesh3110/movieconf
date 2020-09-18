@@ -25,8 +25,10 @@ io.on('connection', (socket) => {
                 if (isHost === 'true') {
                     admins[roomId] = [userId, socket];
                 } else {
-                    socket.to(admins[roomId][0]).emit('receive-peer-id', userId);
-                    io.to(userId).emit('receive-peer-id', admins[roomId][0]);
+                    if (admins[roomId] != undefined) {
+                        socket.to(admins[roomId][0]).emit('receive-peer-id', userId);
+                        io.to(userId).emit('receive-peer-id', admins[roomId][0]);
+                    }
                 }
             });
 
@@ -34,7 +36,9 @@ io.on('connection', (socket) => {
         });
 
         socket.on('disconnect', () => {
-            socket.to(admins[roomId][0]).emit('user-disconnected', userId, nickname);
+            if (admins[roomId] != undefined) {
+                socket.to(admins[roomId][0]).emit('user-disconnected', userId, nickname);
+            }
         });
 
     });
