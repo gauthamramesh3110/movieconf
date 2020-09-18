@@ -14,18 +14,35 @@ app.get('/create-room', (req, res) => {
     })
 })
 
+admins = {}
+
 io.on('connection', (socket) => {
 
-    socket.on('join-room', (roomId, nickname) => {
-        socket.join(roomId);
-        socket.to(roomId).broadcast.emit('user-joined', nickname)
-        console.log(nickname + ' has joined room: ' + roomId)
+    socket.on('join-room', (roomId, userId, nickname, isHost) => {
+
+        socket.join(roomId, () => {
+            socket.join(userId, () => {
+                if (isHost === 'true') {
+                    admins[roomId] = [userId, socket];
+                } else {
+                    socket.to(admins[roomId][0]).emit('receive-peer-id', userId);
+                    io.to(userId).emit('receive-peer-id', admins[roomId][0]);
+                }
+            });
+
+            socket.to(roomId).broadcast.emit('user-joined', nickname);
+        });
+
+        socket.on('disconnect', () => {
+            socket.to(admins[roomId][0]).emit('user-disconnected', userId, nickname);
+        });
+
     });
 
     socket.on('send-message', (roomId, nickname, message) => {
-        console.log('message')
         socket.to(roomId).broadcast.emit('receive-message', nickname, message);
-    })
+    });
+
 });
 
 var port = process.env.PORT

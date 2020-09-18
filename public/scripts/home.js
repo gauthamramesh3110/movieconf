@@ -1,10 +1,99 @@
+if ( getCookie('roomId') === '' || getCookie('nickname') === '' || getCookie('isHost') === '' ){
+    window.location.replace('/')
+}
+
+//START OF SOCKET AND PEER HANDLING
+
 let socket = io();
-socket.emit('join-room', getCookie('roomId'), getCookie('nickname'));
+let peer = new Peer();
+
+let connections = {}
+
+let videoPlayer = document.getElementById('video-player');
+
+peer.on('open', function (userId) {
+    socket.emit('join-room', getCookie('roomId'), userId, getCookie('nickname'), getCookie('isHost'));
+});
+
+socket.on('user-joined', (nickname) => {
+    let chatList = document.getElementById('chatbox');
+
+    let notificationBubble = document.createElement('div');
+    notificationBubble.className = 'notification-bubble';
+
+    let textnode = document.createTextNode(nickname + ' has joined the room.')
+
+    notificationBubble.appendChild(textnode);
+    chatList.appendChild(notificationBubble);
+})
+
+socket.on('receive-message', (nickname, message) => {
+    let chatList = document.getElementById('chatbox');
+    let messageBubble = createMessageBubble(nickname, message, true);
+    chatList.appendChild(messageBubble)
+    updateScroll();
+})
+
+socket.on('receive-peer-id', (peerId) => {
+    if (getCookie('isHost') === 'true') {
+        let videoStream = videoPlayer.captureStream(0);
+        let call = peer.call(peerId, videoStream);
+
+        connections[peerId] = call;
+    }
+
+    console.log(peer.connections)
+})
+
+socket.on('user-disconnected', (userId, nickname) => {
+    connections[userId].close();
+    delete connections[userId];
+
+    let chatList = document.getElementById('chatbox');
+
+    let notificationBubble = document.createElement('div');
+    notificationBubble.className = 'notification-bubble';
+
+    let textnode = document.createTextNode(nickname + ' has left the room.')
+
+    notificationBubble.appendChild(textnode);
+    chatList.appendChild(notificationBubble);
+})
+
+peer.on('call', (call) => {
+    call.answer();
+    call.on('stream', (stream) => {
+        console.log('streaming')
+        videoPlayer.srcObject = stream;
+    })
+})
+
+
+videoPlayer.onplay = function (e) {
+    Object.keys(connections).forEach(userId => {
+        connections[userId].close();
+
+        let videoStream = videoPlayer.captureStream(0);
+        let call = peer.call(userId, videoStream);
+
+        connections[userId] = call;
+    });
+}
+
+videoPlayer.onloadedmetadata = function (e) {
+    videoPlayer.play();
+}
+
+//END OF SOCKET AND PEER HANDLING
+
+
 
 let roomId = document.getElementById('room-id');
 let content = document.createTextNode(getCookie('roomId'));
 roomId.appendChild(content);
 
+
+// FILE SELECTOR HANDLING
 let selectFile = document.getElementById('select-file');
 let filename = document.getElementById('filename');
 
@@ -13,12 +102,40 @@ if (getCookie('isHost') == 'false') {
     filename.style.display = 'none'
 }
 
+let fileSelector = document.getElementById('file-selector');
 selectFile.onclick = function (e) {
-    if (!getCookie('isHost')) {
+    if (getCookie('isHost') === 'false') {
         return;
     }
+
+    fileSelector.click();
 }
 
+fileSelector.onchange = function (e) {
+    let myVideoFile = fileSelector.files[0];
+    videoPlayer.src = URL.createObjectURL(myVideoFile);
+
+
+    filename.innerText = '';
+    let textnode = document.createTextNode(myVideoFile.name)
+    filename.appendChild(textnode)
+}
+// END OF FILE SELECTOR HANDLING
+
+
+
+// LEAVE ROOM HANDLING
+let leaveRoom = document.getElementById('leave-room');
+leaveRoom.onclick = function(e){
+    setCookie('roomId', '')
+    setCookie('nickname', '')
+    setCookie('isHost', '')
+    window.location.replace('/')
+}
+
+
+
+// CHAT INPUT HANDLING
 let chatInput = document.getElementById('chat-input');
 chatInput.onkeyup = function (e) {
     if (e.keyCode === 13) {
@@ -39,25 +156,7 @@ chatInput.onkeyup = function (e) {
         updateScroll();
     }
 }
-
-socket.on('user-joined', (nickname) => {
-    let chatList = document.getElementById('chatbox');
-
-    let notificationBubble = document.createElement('div');
-    notificationBubble.className = 'notification-bubble';
-
-    let textnode = document.createTextNode(nickname + ' has joined the room.')
-
-    notificationBubble.appendChild(textnode);
-    chatList.appendChild(notificationBubble);
-})
-
-socket.on('receive-message', (nickname, message) => {
-    let chatList = document.getElementById('chatbox');
-    let messageBubble = createMessageBubble(nickname, message, true);
-    chatList.appendChild(messageBubble)
-    updateScroll();
-})
+//END OF CHAT INPUT HANDLING
 
 function createMessageBubble(nickname, message, isReceived) {
     let messageBubble = document.createElement('div');
