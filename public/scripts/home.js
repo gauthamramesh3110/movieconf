@@ -2,6 +2,10 @@ if ( getCookie('roomId') === '' || getCookie('nickname') === '' || getCookie('is
     window.location.replace('/')
 }
 
+colors = ['#5A379C', '#8F007C', '#256EBB', '#49BEAA', '#FFC914', '#FF570A', '#D72638', '#484D59']
+colorNumber = Math.floor((Math.random() * colors.length));
+
+
 //START OF SOCKET AND PEER HANDLING
 
 let socket = io();
@@ -25,11 +29,13 @@ socket.on('user-joined', (nickname) => {
 
     notificationBubble.appendChild(textnode);
     chatList.appendChild(notificationBubble);
+
+    updateScroll();
 })
 
-socket.on('receive-message', (nickname, message) => {
+socket.on('receive-message', (nickname, message, color) => {
     let chatList = document.getElementById('chatbox');
-    let messageBubble = createMessageBubble(nickname, message, true);
+    let messageBubble = createMessageBubble(nickname, message, true, color);
     chatList.appendChild(messageBubble)
     updateScroll();
 })
@@ -146,10 +152,10 @@ chatInput.onkeyup = function (e) {
             return
         }
 
-        socket.emit('send-message', getCookie('roomId'), getCookie('nickname'), message);
+        socket.emit('send-message', getCookie('roomId'), getCookie('nickname'), message, colors[colorNumber]);
 
         let chatList = document.getElementById('chatbox');
-        let messageBubble = createMessageBubble('You', message, false);
+        let messageBubble = createMessageBubble('You', message, false, colors[colorNumber]);
         chatList.appendChild(messageBubble)
 
         chatInput.value = ''
@@ -158,7 +164,7 @@ chatInput.onkeyup = function (e) {
 }
 //END OF CHAT INPUT HANDLING
 
-function createMessageBubble(nickname, message, isReceived) {
+function createMessageBubble(nickname, message, isReceived, color) {
     let messageBubble = document.createElement('div');
     messageBubble.className = `message-bubble ${isReceived ? 'received' : 'sent'}`;
 
@@ -168,6 +174,12 @@ function createMessageBubble(nickname, message, isReceived) {
 
     let messageSenderTextnode = document.createTextNode(nickname + ': ');
     messageSender.appendChild(messageSenderTextnode);
+
+    messageSender.style.color = color;
+
+    if (!isReceived){
+        messageSender.style.display = 'none';
+    }
 
 
     let messageBody = document.createElement('div');

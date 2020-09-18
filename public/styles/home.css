@@ -59,10 +59,18 @@ body {
     overflow-y: scroll;
     height: auto;
     margin-top: 30px;
+    padding-top: 5px;
     width: 100%;
     border-top: #19297c;
     border-top-width: 2px;
     border-top-style: solid;
+
+    -ms-overflow-style: none; /* IE and Edge */
+    scrollbar-width: none; /* Firefox */
+}
+
+#chatbox::-webkit-scrollbar {
+    display: none;
 }
 
 #chat-input {
@@ -78,31 +86,38 @@ body {
     border-radius: 4px;
     align-self: center;
     margin: 10px 0px;
+    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.25);
 }
 
 .message-bubble {
     width: fit-content;
-    padding: 3px 10px;
-    border-radius: 4px;
-    margin: 10px 0px;
+    margin: 5px 0px;
+    max-width: 85%;
+    word-wrap: normal;
+    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.25);
 }
 
 .message-bubble .message-sender {
     font-weight: 900;
+    margin-bottom: 5px;
 }
 
 .message-bubble.received {
+    background-color: #FAF5F0;
+    color: black;
+    align-self: flex-start;
+    margin-left: 10px;
+    border-radius: 3px 20px 20px 3px;
+    padding: 10px 15px 10px 10px;
+}
+
+.message-bubble.sent {
     background-color: #19297c;
     color: white;
     align-self: flex-end;
     margin-right: 10px;
-}
-
-.message-bubble.sent {
-    background-color: #637074;
-    color: white;
-    align-self: flex-start;
-    margin-left: 10px;
+    border-radius: 20px 3px 3px 20px;
+    padding: 10px 10px 10px 15px;
 }
 
 video {

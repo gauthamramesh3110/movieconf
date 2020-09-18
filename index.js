@@ -44,8 +44,8 @@ io.on('connection', (socket) => {
 
     });
 
-    socket.on('send-message', (roomId, nickname, message) => {
-        socket.to(roomId).broadcast.emit('receive-message', nickname, message);
+    socket.on('send-message', (roomId, nickname, message, color) => {
+        socket.to(roomId).broadcast.emit('receive-message', nickname, message, color);
     });
 
 });
