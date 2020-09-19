@@ -1,125 +1,120 @@
 html {
-    height: 100vh;
+	height: 100vh;
 }
 
 body {
-    min-height: 100vh;
-    display: flex;
-    flex-direction: row;
+	min-height: 100vh;
+	display: flex;
+	flex-direction: row;
 }
 
 #video-pane {
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    width: 75%;
-    height: 100vh;
-    background-color: black;
+	display: flex;
+	flex-direction: row;
+	align-items: center;
+	width: 75%;
+	height: 100vh;
+	background-color: black;
 }
 
 #chat-pane {
-    width: 25%;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    height: 100vh;
+	width: 25%;
+	display: flex;
+	flex-direction: column;
+	align-items: center;
+	height: 100vh;
 }
 
 .logo {
-    margin-top: 30px;
-    font-size: 3vw;
+	margin-top: 30px;
+	font-size: 3vw;
 }
 
 #room-id {
-    color: #19297c;
-    font-size: 1vw;
-    margin-bottom: 20px;
-}
-
-#filename {
-    margin-top: 2px;
-    margin-bottom: 15px;
-    font-size: 0.8vw;
+	color: #19297c;
+	font-size: 1vw;
+	margin-bottom: 20px;
 }
 
 #select-file {
     font-size: 1.2vw;
+    margin-bottom: 10px;
 }
 
 #leave-room {
-    font-size: 1.2vw;
-    background-color: #d72638;
+	font-size: 1.2vw;
+	background-color: #d72638;
 }
 
 #chatbox {
-    display: flex;
-    flex-direction: column;
-    flex: 1;
-    align-items: center;
-    overflow-y: scroll;
-    height: auto;
-    margin-top: 30px;
-    padding-top: 5px;
-    width: 100%;
-    border-top: #19297c;
-    border-top-width: 2px;
-    border-top-style: solid;
+	display: flex;
+	flex-direction: column;
+	flex: 1;
+	align-items: center;
+	overflow-y: scroll;
+	height: auto;
+	margin-top: 30px;
+	padding-top: 5px;
+	width: 100%;
+	border-top: #19297c;
+	border-top-width: 2px;
+	border-top-style: solid;
 
-    -ms-overflow-style: none; /* IE and Edge */
-    scrollbar-width: none; /* Firefox */
+	-ms-overflow-style: none; /* IE and Edge */
+	scrollbar-width: none; /* Firefox */
 }
 
 #chatbox::-webkit-scrollbar {
-    display: none;
+	display: none;
 }
 
 #chat-input {
-    width: 90%;
-    margin: 20px 0px;
+	width: 90%;
+	margin: 20px 0px;
 }
 
 .notification-bubble {
-    background-color: #8693ab;
-    color: white;
-    width: fit-content;
-    padding: 3px 10px;
-    border-radius: 4px;
-    align-self: center;
-    margin: 10px 0px;
-    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.25);
+	background-color: #8693ab;
+	color: white;
+	width: fit-content;
+	padding: 3px 10px;
+	border-radius: 4px;
+	align-self: center;
+	margin: 10px 0px;
+	box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.25);
 }
 
 .message-bubble {
-    width: fit-content;
-    margin: 5px 0px;
-    max-width: 85%;
-    word-wrap: normal;
-    box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.25);
+	width: fit-content;
+	margin: 5px 0px;
+	max-width: 85%;
+	word-wrap: normal;
+	box-shadow: 0px 0px 2px rgba(0, 0, 0, 0.25);
 }
 
-.message-bubble .message-sender {
-    font-weight: 900;
-    margin-bottom: 5px;
+.message-bubble .message-header {
+	font-weight: 900;
+	margin-bottom: 5px;
 }
 
 .message-bubble.received {
-    background-color: #FAF5F0;
-    color: black;
-    align-self: flex-start;
-    margin-left: 10px;
-    border-radius: 3px 20px 20px 3px;
-    padding: 10px 15px 10px 10px;
+	background-color: #faf5f0;
+	color: black;
+	align-self: flex-start;
+	margin-left: 10px;
+	border-radius: 3px 20px 20px 3px;
+	padding: 10px 15px 10px 10px;
 }
 
 .message-bubble.sent {
-    background-color: #19297c;
-    color: white;
-    align-self: flex-end;
-    margin-right: 10px;
-    border-radius: 20px 3px 3px 20px;
-    padding: 10px 10px 10px 15px;
+	background-color: #19297c;
+	color: white;
+	align-self: flex-end;
+	margin-right: 10px;
+	border-radius: 20px 3px 3px 20px;
+	padding: 10px 10px 10px 15px;
 }
 
 video {
-    width: 100%;
+	width: 100%;
 }

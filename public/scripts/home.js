@@ -1,200 +1,177 @@
-if ( getCookie('roomId') === '' || getCookie('nickname') === '' || getCookie('isHost') === '' ){
-    window.location.replace('/')
-}
-
-colors = ['#5A379C', '#8F007C', '#256EBB', '#49BEAA', '#FFC914', '#FF570A', '#D72638', '#484D59']
-colorNumber = Math.floor((Math.random() * colors.length));
-
-
-//START OF SOCKET AND PEER HANDLING
-
 let socket = io();
 let peer = new Peer();
+let roomId = getCookie('roomId');
+let nickname = getCookie('nickname');
+let isHost = getCookie('isHost') === 'true';
 
-let connections = {}
+let clients = new Set();
+let calls = {};
 
-let videoPlayer = document.getElementById('video-player');
+let messageOrigin = {
+	sent: 'sent',
+	received: 'received',
+};
 
-peer.on('open', function (userId) {
-    socket.emit('join-room', getCookie('roomId'), userId, getCookie('nickname'), getCookie('isHost'));
+let roomIdElement = document.getElementById('room-id');
+let roomIdText = document.createTextNode(roomId);
+roomIdElement.appendChild(roomIdText);
+
+// GET PEER ID AND JOIN ROOM
+peer.on('open', (userId) => {
+	console.log(`My UserID is: ${userId}`);
+	socket.emit('join-room', roomId, userId, nickname, isHost);
+
+	socket.on('peer-added', (peerId) => {
+		console.log(`${peerId} added.`);
+		clients.add(peerId);
+
+		let video = document.getElementById('video-player');
+		let stream = video.captureStream(0);
+
+		sendStreamToClient(peerId, stream);
+	});
+
+	socket.on('peer-removed', (peerId) => {
+		console.log(`${peerId} removed.`);
+		clients.delete(peerId);
+		stopStreamToClient(peerId);
+	});
+
+	socket.on('user-connected', (nickname) => {
+		let notificationText = `${nickname} has joined the room.`;
+		notifyChat(notificationText);
+	});
+
+	socket.on('user-disconnected', (nickname) => {
+		let notificationText = `${nickname} has left the room.`;
+		notifyChat(notificationText);
+	});
+
+	socket.on('session-destroyed', () => {
+		leaveRoom();
+	});
+
+	socket.on('message-received', (nickname, message) => {
+		addMessageToChat(nickname, message, messageOrigin.received);
+	});
+
+	peer.on('call', (call) => {
+		call.answer();
+		streamVideoFromHost(call);
+	});
 });
 
-socket.on('user-joined', (nickname) => {
-    let chatList = document.getElementById('chatbox');
-
-    let notificationBubble = document.createElement('div');
-    notificationBubble.className = 'notification-bubble';
-
-    let textnode = document.createTextNode(nickname + ' has joined the room.')
-
-    notificationBubble.appendChild(textnode);
-    chatList.appendChild(notificationBubble);
-
-    updateScroll();
-})
-
-socket.on('receive-message', (nickname, message, color) => {
-    let chatList = document.getElementById('chatbox');
-    let messageBubble = createMessageBubble(nickname, message, true, color);
-    chatList.appendChild(messageBubble)
-    updateScroll();
-})
-
-socket.on('receive-peer-id', (peerId) => {
-    if (getCookie('isHost') === 'true') {
-        let videoStream = videoPlayer.captureStream(0);
-        let call = peer.call(peerId, videoStream);
-
-        connections[peerId] = call;
-    }
-
-    console.log(peer.connections)
-})
-
-socket.on('user-disconnected', (userId, nickname) => {
-    connections[userId].close();
-    delete connections[userId];
-
-    let chatList = document.getElementById('chatbox');
-
-    let notificationBubble = document.createElement('div');
-    notificationBubble.className = 'notification-bubble';
-
-    let textnode = document.createTextNode(nickname + ' has left the room.')
-
-    notificationBubble.appendChild(textnode);
-    chatList.appendChild(notificationBubble);
-})
-
-peer.on('call', (call) => {
-    call.answer();
-    call.on('stream', (stream) => {
-        console.log('streaming')
-        videoPlayer.srcObject = stream;
-    })
-})
-
-
-videoPlayer.onplay = function (e) {
-    Object.keys(connections).forEach(userId => {
-        connections[userId].close();
-
-        let videoStream = videoPlayer.captureStream(0);
-        let call = peer.call(userId, videoStream);
-
-        connections[userId] = call;
-    });
+// AUXILLARY FUNCTIONS
+function sendStreamToClient(peerId, stream) {
+	let call = peer.call(peerId, stream);
+	calls[peerId] = call;
 }
 
-videoPlayer.onloadedmetadata = function (e) {
-    videoPlayer.play();
+function stopStreamToClient(peerId) {
+	calls[peerId].close();
+	delete calls[peerId];
 }
 
-//END OF SOCKET AND PEER HANDLING
+function streamVideoFromHost(call) {
+	let video = document.getElementById('video-player');
 
-
-
-let roomId = document.getElementById('room-id');
-let content = document.createTextNode(getCookie('roomId'));
-roomId.appendChild(content);
-
-
-// FILE SELECTOR HANDLING
-let selectFile = document.getElementById('select-file');
-let filename = document.getElementById('filename');
-
-if (getCookie('isHost') == 'false') {
-    selectFile.style.display = 'none'
-    filename.style.display = 'none'
+	call.on('stream', (stream) => {
+		video.srcObject = stream;
+	});
 }
 
-let fileSelector = document.getElementById('file-selector');
-selectFile.onclick = function (e) {
-    if (getCookie('isHost') === 'false') {
-        return;
-    }
-
-    fileSelector.click();
+function leaveRoom() {
+	setCookie('roomId', '');
+	setCookie('isHost', '');
+	setCookie('nickname', '');
+	window.location.replace('/');
 }
 
-fileSelector.onchange = function (e) {
-    let myVideoFile = fileSelector.files[0];
-    videoPlayer.src = URL.createObjectURL(myVideoFile);
+function addMessageToChat(nickname, message, origin) {
+	let chatBoxElement = document.getElementById('chatbox');
+	let messageBubble = document.createElement('div');
 
+	let messageHeader = document.createElement('div');
+	let messageHeaderText = document.createTextNode(nickname);
+	messageHeader.appendChild(messageHeaderText);
+	messageHeader.className = 'message-header';
+	if (origin === 'sent') {
+		messageHeader.style.display = 'none';
+	}
 
-    filename.innerText = '';
-    let textnode = document.createTextNode(myVideoFile.name)
-    filename.appendChild(textnode)
+	let messageBody = document.createElement('div');
+	let messageBodyText = document.createTextNode(message);
+	messageBody.appendChild(messageBodyText);
+
+	messageBubble.appendChild(messageHeader);
+	messageBubble.appendChild(messageBody);
+
+	messageBubble.className = 'message-bubble ' + origin;
+
+	chatBoxElement.appendChild(messageBubble);
+
+	updateScrollPosition('chatbox');
 }
-// END OF FILE SELECTOR HANDLING
 
+function notifyChat(notificationText) {
+	let chatBoxElement = document.getElementById('chatbox');
+	let notificationBubble = document.createElement('div');
+	let notificationTextNode = document.createTextNode(notificationText);
 
+	notificationBubble.appendChild(notificationTextNode);
+	notificationBubble.className = 'notification-bubble';
 
-// LEAVE ROOM HANDLING
-let leaveRoom = document.getElementById('leave-room');
-leaveRoom.onclick = function(e){
-    setCookie('roomId', '')
-    setCookie('nickname', '')
-    setCookie('isHost', '')
-    window.location.replace('/')
+	chatBoxElement.appendChild(notificationBubble);
+	updateScrollPosition('chatbox');
 }
 
+function updateScrollPosition(id) {
+	var element = document.getElementById(id);
+	element.scrollTop = element.scrollHeight - element.clientHeight;
+}
 
-
-// CHAT INPUT HANDLING
+//EVENT LISTENERS
 let chatInput = document.getElementById('chat-input');
 chatInput.onkeyup = function (e) {
-    if (e.keyCode === 13) {
-        e.preventDefault();
+	if (chatInput.value.length === 0) return;
 
-        let message = chatInput.value;
-        if (message.length == 0) {
-            return
-        }
+	if (e.keyCode == 13) {
+		e.preventDefault();
 
-        socket.emit('send-message', getCookie('roomId'), getCookie('nickname'), message, colors[colorNumber]);
+		let message = chatInput.value;
+		socket.emit('message-sent', message);
 
-        let chatList = document.getElementById('chatbox');
-        let messageBubble = createMessageBubble('You', message, false, colors[colorNumber]);
-        chatList.appendChild(messageBubble)
+		addMessageToChat('You', message, messageOrigin.sent);
+		chatInput.value = '';
+	}
+};
 
-        chatInput.value = ''
-        updateScroll();
-    }
-}
-//END OF CHAT INPUT HANDLING
+let selectFileButton = document.getElementById('select-file');
+let fileSelector = document.getElementById('file-selector');
+selectFileButton.onclick = function (e) {
+	if (isHost) {
+		fileSelector.click();
+	}
+};
+fileSelector.onchange = function (e) {
+	let video = document.getElementById('video-player');
+	let file = fileSelector.files[0];
+	video.src = URL.createObjectURL(file);
+};
 
-function createMessageBubble(nickname, message, isReceived, color) {
-    let messageBubble = document.createElement('div');
-    messageBubble.className = `message-bubble ${isReceived ? 'received' : 'sent'}`;
+let video = document.getElementById('video-player');
+video.onloadeddata = function (e) {
+	if (isHost) {
+		let stream = video.captureStream(0);
+		clients.forEach((clientId) => {
+			console.log(`Start streaming to ${clientId}`);
+			stopStreamToClient(clientId);
+			sendStreamToClient(clientId, stream);
+		});
+	}
+};
 
-
-    let messageSender = document.createElement('div');
-    messageSender.className = 'message-sender';
-
-    let messageSenderTextnode = document.createTextNode(nickname + ': ');
-    messageSender.appendChild(messageSenderTextnode);
-
-    messageSender.style.color = color;
-
-    if (!isReceived){
-        messageSender.style.display = 'none';
-    }
-
-
-    let messageBody = document.createElement('div');
-    messageBody.className = 'message-body'
-
-    let messageBodyTextNode = document.createTextNode(message)
-    messageBody.appendChild(messageBodyTextNode)
-
-    messageBubble.appendChild(messageSender)
-    messageBubble.appendChild(messageBody)
-
-    return messageBubble;
-}
-
-function updateScroll() {
-    var element = document.getElementById("chatbox");
-    element.scrollTop = element.scrollHeight;
-}
+let leaveRoomButton = document.getElementById('leave-room');
+leaveRoomButton.onclick = function (e) {
+	leaveRoom();
+};
