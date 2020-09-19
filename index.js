@@ -39,9 +39,13 @@ io.on('connection', (socket) => {
 					};
 				} else {
 					// ADD NEW USER TO ROOM IF NOT THE HOST, EXCHANGE USER-ID WITH HOST, AND NOTIFY ROOM
-					rooms[roomId].users.push(userId);
-					socket.to(rooms[roomId].hostId).emit('peer-added', userId);
-					socket.to(roomId).broadcast.emit('user-connected', nickname);
+					if (rooms[roomId] == undefined) {
+						io.to(userId).emit('session-destroyed');
+					} else {
+						rooms[roomId].users.push(userId);
+						socket.to(rooms[roomId].hostId).emit('peer-added', userId);
+						socket.to(roomId).broadcast.emit('user-connected', nickname);
+					}
 				}
 				console.log(rooms);
 			});
