@@ -1,7 +1,7 @@
 {
-  "name": "streamo",
+  "name": "MovieConf",
   "version": "1.0.0",
-  "description": "Stream videos with your friends remotely.",
+  "description": "Create a movie conference and watch your favorite movies with your friends.",
   "main": "index.js",
   "scripts": {
     "dev": "nodemon index.js",
