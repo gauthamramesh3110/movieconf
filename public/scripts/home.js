@@ -4,6 +4,10 @@ let roomId = getCookie('roomId');
 let nickname = getCookie('nickname');
 let isHost = getCookie('isHost') === 'true';
 
+if (roomId.length == 0) {
+	window.location.replace('/');
+}
+
 let clients = new Set();
 let calls = {};
 
@@ -80,7 +84,7 @@ function streamVideoFromHost(call) {
 
 function leaveRoom() {
 	setCookie('roomId', '');
-	setCookie('isHost', '');
+	setCookie('isHost', 'false');
 	setCookie('nickname', '');
 	window.location.replace('/');
 }
@@ -146,6 +150,10 @@ chatInput.onkeyup = function (e) {
 };
 
 let selectFileButton = document.getElementById('select-file');
+if (!isHost) {
+	selectFileButton.style.display = 'none';
+}
+
 let fileSelector = document.getElementById('file-selector');
 selectFileButton.onclick = function (e) {
 	if (isHost) {
@@ -173,4 +181,10 @@ video.onloadeddata = function (e) {
 let leaveRoomButton = document.getElementById('leave-room');
 leaveRoomButton.onclick = function (e) {
 	leaveRoom();
+};
+
+window.onbeforeunload = function (e) {
+	if (isHost) {
+		leaveRoom();
+	}
 };
