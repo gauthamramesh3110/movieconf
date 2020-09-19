@@ -1,5 +1,5 @@
 {
-  "name": "MovieConf",
+  "name": "movieconf",
   "version": "1.0.0",
   "description": "Create a movie conference and watch your favorite movies with your friends.",
   "main": "index.js",
