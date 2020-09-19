@@ -22,7 +22,6 @@ peer.on('open', (userId) => {
 	socket.emit('join-room', roomId, userId, nickname, isHost);
 
 	socket.on('peer-added', (peerId) => {
-		console.log(`${peerId} added.`);
 		clients.add(peerId);
 
 		let video = document.getElementById('video-player');
@@ -32,7 +31,6 @@ peer.on('open', (userId) => {
 	});
 
 	socket.on('peer-removed', (peerId) => {
-		console.log(`${peerId} removed.`);
 		clients.delete(peerId);
 		stopStreamToClient(peerId);
 	});
@@ -51,8 +49,8 @@ peer.on('open', (userId) => {
 		leaveRoom();
 	});
 
-	socket.on('message-received', (nickname, message) => {
-		addMessageToChat(nickname, message, messageOrigin.received);
+	socket.on('message-received', (nickname, message, color) => {
+		addMessageToChat(nickname, message, messageOrigin.received, color);
 	});
 
 	peer.on('call', (call) => {
@@ -87,7 +85,7 @@ function leaveRoom() {
 	window.location.replace('/');
 }
 
-function addMessageToChat(nickname, message, origin) {
+function addMessageToChat(nickname, message, origin, color) {
 	let chatBoxElement = document.getElementById('chatbox');
 	let messageBubble = document.createElement('div');
 
@@ -98,6 +96,7 @@ function addMessageToChat(nickname, message, origin) {
 	if (origin === 'sent') {
 		messageHeader.style.display = 'none';
 	}
+	messageHeader.style.color = color;
 
 	let messageBody = document.createElement('div');
 	let messageBodyText = document.createTextNode(message);

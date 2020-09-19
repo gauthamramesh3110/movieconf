@@ -23,10 +23,30 @@ roomId: {
 }
 */
 rooms = {};
+colors = [
+	'#B71C1C',
+	'#880E4F',
+	'#4A148C',
+	'#4527A0',
+	'##3949AB',
+	'#2962FF',
+	'#0091EA',
+	'#006064',
+	'#004D40',
+	'#1B5E20',
+	'#827717',
+	'#FF6F00',
+	'#BF360C',
+	'#4E342E',
+	'#424242',
+];
 
 io.on('connection', (socket) => {
 	socket.on('join-room', (roomId, userId, nickname, isHost) => {
 		//JOIN A ROOM
+
+		let color = colors[Math.floor(Math.random() * colors.length)];
+
 		socket.join(roomId, () => {
 			socket.join(userId, () => {
 				console.log(`${nickname} with id ${userId} joined room: ${roomId}`);
@@ -47,13 +67,13 @@ io.on('connection', (socket) => {
 						socket.to(roomId).broadcast.emit('user-connected', nickname);
 					}
 				}
-				console.log(rooms);
 			});
 		});
 
 		socket.on('disconnect', () => {
 			if (isHost) {
 				// DESTROY ROOM IF HOST DISCONNECTS
+				console.log(`${roomId} has been destroyed!`)
 				socket.to(roomId).broadcast.emit('session-destroyed');
 				delete rooms[roomId];
 			} else {
@@ -66,12 +86,10 @@ io.on('connection', (socket) => {
 					});
 				}
 			}
-
-			console.log(rooms);
 		});
 
 		socket.on('message-sent', (message) => {
-			socket.to(roomId).broadcast.emit('message-received', nickname, message);
+			socket.to(roomId).broadcast.emit('message-received', nickname, message, color);
 		});
 	});
 });
