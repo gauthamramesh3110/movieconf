@@ -13,10 +13,10 @@ fetch('/getconfig', {
 
 function connectPeer(host, port, path) {
 	let peer = new Peer({
-		host: host,
-		port: port,
-		path: path,
-		secure: false,
+		host: 'movieconfpeerserver.herokuapp.com',
+		port: 443,
+		path: '/peerjs/peer',
+		secure: true,
 		config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }], sdpSemantics: 'unified-plan' },
 	});
 	// GET PEER ID AND JOIN ROOM
