@@ -1,11 +1,19 @@
 const express = require('express');
-const { disconnect } = require('process');
 const app = express();
 const server = require('http').createServer(app);
 const io = require('socket.io')(server);
+
 require('dotenv').config();
 
 app.use(express.static('./public'));
+
+app.get('/getconfig', (req, res) => {
+	res.json({
+		host: process.env.PEER_IP,
+		port: process.env.PEER_PORT,
+		path: process.env.PEER_PATH,
+	});
+});
 
 app.get('/create-room', (req, res) => {
 	res.json({
@@ -73,7 +81,7 @@ io.on('connection', (socket) => {
 		socket.on('disconnect', () => {
 			if (isHost) {
 				// DESTROY ROOM IF HOST DISCONNECTS
-				console.log(`${roomId} has been destroyed!`)
+				console.log(`${roomId} has been destroyed!`);
 				socket.to(roomId).broadcast.emit('session-destroyed');
 				delete rooms[roomId];
 			} else {
