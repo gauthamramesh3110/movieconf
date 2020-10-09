@@ -16,6 +16,7 @@ function connectPeer(host, port, path) {
 		host: host,
 		port: port,
 		path: path,
+		ssl: false,
 		config: { iceServers: [{ urls: 'stun:stun.l.google.com:19302' }], sdpSemantics: 'unified-plan' },
 	});
 	// GET PEER ID AND JOIN ROOM
